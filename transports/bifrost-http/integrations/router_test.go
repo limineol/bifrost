@@ -109,6 +109,9 @@ func TestChatGPTPassthroughRouterRegistersCodexRoutes(t *testing.T) {
 	for _, route := range []struct{ method, uri string }{
 		{fasthttp.MethodPost, "/chatgpt_passthrough/backend-api/codex/responses"},
 		{fasthttp.MethodGet, "/chatgpt_passthrough/backend-api/codex/models?client_version=0.164.0"},
+		{fasthttp.MethodPost, "/chatgpt_passthrough/backend-api/codex/alpha/search"},
+		{fasthttp.MethodPost, "/chatgpt_passthrough/backend-api/codex/images/generations"},
+		{fasthttp.MethodPost, "/chatgpt_passthrough/backend-api/codex/images/edits"},
 	} {
 		var ctx fasthttp.RequestCtx
 		ctx.Request.Header.SetMethod(route.method)
