@@ -97,7 +97,7 @@ func TestParsePassthroughBody_JSONModelIsStrict(t *testing.T) {
 	}
 }
 
-func TestChatGPTPassthroughRouterRegistersCodexResponsesPost(t *testing.T) {
+func TestChatGPTPassthroughRouterRegistersCodexRoutes(t *testing.T) {
 	r := router.New()
 	passthroughRouter := NewChatGPTPassthroughRouter(nil, &mockHandlerStore{}, nil, &testLogger{})
 	passthroughRouter.RegisterRoutes(r, func(next fasthttp.RequestHandler) fasthttp.RequestHandler {
@@ -106,13 +106,18 @@ func TestChatGPTPassthroughRouterRegistersCodexResponsesPost(t *testing.T) {
 		}
 	})
 
-	var ctx fasthttp.RequestCtx
-	ctx.Request.Header.SetMethod(fasthttp.MethodPost)
-	ctx.Request.SetRequestURI("/chatgpt_passthrough/backend-api/codex/responses")
+	for _, route := range []struct{ method, uri string }{
+		{fasthttp.MethodPost, "/chatgpt_passthrough/backend-api/codex/responses"},
+		{fasthttp.MethodGet, "/chatgpt_passthrough/backend-api/codex/models?client_version=0.164.0"},
+	} {
+		var ctx fasthttp.RequestCtx
+		ctx.Request.Header.SetMethod(route.method)
+		ctx.Request.SetRequestURI(route.uri)
 
-	r.Handler(&ctx)
+		r.Handler(&ctx)
 
-	require.Equal(t, fasthttp.StatusNoContent, ctx.Response.StatusCode())
+		require.Equal(t, fasthttp.StatusNoContent, ctx.Response.StatusCode(), "%s %s", route.method, route.uri)
+	}
 }
 
 func TestRunwarePassthroughRouterRegistersCatchAll(t *testing.T) {
